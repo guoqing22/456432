@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>WMap</title>
+    <link th:href="@{mapbox/mapbox.css}" href="../static/mapbox/mapbox.css" rel='stylesheet'/>
+    <link th:href="@{Leaflet.markercluster-1.3.0/MarkerCluster.css}" href="../static/Leaflet.markercluster-1.3.0/MarkerCluster.css" rel='stylesheet'/>
+    <link th:href="@{Leaflet.markercluster-1.3.0/MarkerCluster.Default.css}" href="../static/Leaflet.markercluster-1.3.0/MarkerCluster.Default.css" rel='stylesheet'/>
+    <link th:href="@{Font-Awesome-4.7.0/css/font-awesome.min.css}" href="../static/Font-Awesome-4.7.0/css/font-awesome.min.css" rel='stylesheet'/>
+    <link th:href="@{Leaflet.awesome-markers-2.0.2/leaflet.awesome-markers.css}" href='../static/Leaflet.awesome-markers-2.0.2/leaflet.awesome-markers.css'  rel="stylesheet"/>
+    <link th:href="@{bootstrap-3.3.7-dist/css/bootstrap.css}" href="../static/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet"/>
+
+
+
+
+    <style>
+        #map {
+            position: absolute;
+            top: 50px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        #controls {
+            margin-left: 10px;
+            padding-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">
+                <img alt="Brand" th:src="1208036.png" src="../static/1208036.png" style="width: 20px;height: 20px"/>
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">算法选择<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" name="astar">A*</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#" name="bfs">Breadth First Search</a></li>
+                        <li><a href="#" name="gbfs">Greedy Best First Search</a></li>
+                        <li><a href="#" name="ucs">Uniform Cost Search</a></li>
+                        <li><a href="#" name="dfs">Depth First Search</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="起点" id="start"/>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="途径" id="tujing"/>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="终点" id="end"/>
+                </div>
+                <button type="submit" class="btn btn-default" id="chaxun">查询</button>
+            </form>
+            <button class="btn btn-default" id="test">查询</button>
+            <div class="nav navbar-nav navbar-right">
+                <i class="far fa-clock"></i>
+                <label id="ttime" style="color: #ed4c46;">1200ms</label>
+            </div>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div id="map"></div>
+
+
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>-->
+<script th:src="@{jquery-3.2.1.min.js}" src="../static/jquery-3.2.1.min.js"></script>
+<script th:src="@{jquery.tools.min.js}" src="../static/jquery.tool.min.js"></script>
+<script th:src='@{mapbox/mapbox.js}' src="../static/mapbox/mapbox.js"></script>
+<script th:src="@{Leaflet.markercluster-1.3.0/leaflet.markercluster.js}" src="../static/Leaflet.markercluster-1.3.0/leaflet.markercluster.js"></script>
+<script th:src="@{Leaflet-awesome-markers-2.0.2/leaflet.awesome-markers.min.js}" src="../static/Leaflet.awesome-markers-2.0.2/leaflet-awesome-markers.min.js"></script>
+<script th:src="@{bootstrap-3.3.7-dist/js/bootstrap.min.js}" src="../static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script src="https://www.googletagmanager.com/gtag/js?id=UA-117918827-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'UA-117918827-1');
+</script>
+
+
+<script>
+    L.mapbox.accessToken = 'pk.eyJ1IjoidGlhbnlpMjIiLCJhIjoiY2pjbHY0dmpsMGpwYTM0cXE5YW9qNm5tMyJ9.F1SO_4nuLD3dn1mYdPPnrA';
+    var map = L.mapbox.map('map', 'mapbox.streets').setView([44.98, -93.25], 18);
+    var markers = new L.MarkerClusterGroup();
+</script>
+
+<script>
+    var start,tujing,end
+    $("#start").bind('input property change', function() {
+        start = $("#start").val()
+        $.ajax({
+            url: "/getnode",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                "nid": start
+            }),
+            success: function (msg) {
+                console.log(start+":\\"+msg.nid)
+            },
+            error: function (msg) {
+                console.log("失败")
+            }
+        })
+    });
+    $("#tujing").bind('input property change', function() {
+        tujing = $("#tujing").val()
+        $.ajax({
+            url: "/getnode",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                "name": tujing
+            }),
+            success: function (msg) {
+
+                console.log(tujing+":\\"+msg)
+            },
+            error: function (msg) {
+                tujing=msg.lat
+                console.log(msg)
+            }
+        })
+    });
+    $("#end").bind('input property change', function() {
+        end = $("#end").val()
+        $.ajax({
+            url: "/getnode",
+            type: "post",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify({
+                "name": end
+            }),
+            success: function (msg) {
+                console.log(end+":\\"+msg.data.lon)
+            },
+            error: function (msg) {
+                console.log("失败")
+            }
+        })
+    });
+
+    $("#test").click(function() {
+        alert("start:"+start+"tujing:"+tujing+"end:"+end)
+    });
+</script>
+
+
+</body>
+</html>
