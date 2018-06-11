@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
  **/
 @Controller
 public class PageController {
+
     private final Logger LOGGER = LogManager.getLogger(PageController.class);
+
     @RequestMapping("/index")
     public String index(Model model) {
         LOGGER.info("访问index界面");
         return "index";
     }
+
 }

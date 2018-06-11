@@ -30,7 +30,12 @@ public interface NodeRepository extends PagingAndSortingRepository<Node, Long> {
     @Query("MATCH (n:Node) WHERE n.nid = {nid} RETURN n")
     Node findbyid(@Param("nid") String nid);
 
-    @Query("MATCH (n:Node) WHERE n.nid =~ ('(?i).*'+{nid}+'.*') RETURN n")
+    /**
+     * 根据nid模糊查找
+     * @param nid 节点编号
+     * @return
+     */
+    @Query("MATCH (n:Node) WHERE n.nid =~ ('(?i).*'+{nid}+'.*') RETURN n limit 5")
     Collection<Node> findbyidlike(@Param("nid") String nid);
 
     /**
@@ -39,7 +44,6 @@ public interface NodeRepository extends PagingAndSortingRepository<Node, Long> {
      * @param end_id
      * @return
      */
-
-    @Query("match p=shortestPath((a:Node)-[*..1000]->(b:Node)) where a.nid = {start_id} and b.nid = {end_id} return p")
+    @Query("match p=allshortestPaths((a:Node)-[*..1000]->(b:Node)) where a.nid = {start_id} and b.nid = {end_id} return p")
     Collection<Node> graph(@Param("start_id") String start_id, @Param("end_id") String end_id);
 }

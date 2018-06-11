@@ -51,6 +51,10 @@ public class Node {
         return nid;
     }
 
+    public void setNid(String nid){
+        this.nid = nid;
+    }
+
     public String getLat() {
         return lat;
     }

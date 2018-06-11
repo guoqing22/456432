@@ -2,51 +2,76 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>WMap</title>
     <link th:href="@{mapbox/mapbox.css}" href="../static/mapbox/mapbox.css" rel='stylesheet'/>
-    <link th:href="@{Leaflet.markercluster-1.3.0/MarkerCluster.css}" href="../static/Leaflet.markercluster-1.3.0/MarkerCluster.css" rel='stylesheet'/>
-    <link th:href="@{Leaflet.markercluster-1.3.0/MarkerCluster.Default.css}" href="../static/Leaflet.markercluster-1.3.0/MarkerCluster.Default.css" rel='stylesheet'/>
-    <link th:href="@{Font-Awesome-4.7.0/css/font-awesome.min.css}" href="../static/Font-Awesome-4.7.0/css/font-awesome.min.css" rel='stylesheet'/>
-    <link th:href="@{Leaflet.awesome-markers-2.0.2/leaflet.awesome-markers.css}" href='../static/Leaflet.awesome-markers-2.0.2/leaflet.awesome-markers.css'  rel="stylesheet"/>
-    <link th:href="@{bootstrap-3.3.7-dist/css/bootstrap.css}" href="../static/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet"/>
-
-
-
+    <link th:href="@{Leaflet.markercluster/MarkerCluster.css}" href="../static/Leaflet.markercluster/MarkerCluster.css"
+          rel='stylesheet'/>
+    <link th:href="@{Leaflet.markercluster/MarkerCluster.Default.css}"
+          href="../static/Leaflet.markercluster/MarkerCluster.Default.css" rel='stylesheet'/>
+    <link th:href="@{Font-Awesome-4.7.0/css/font-awesome.min.css}"
+          href="../static/Font-Awesome-4.7.0/css/font-awesome.min.css" rel='stylesheet'/>
+    <link th:href="@{Leaflet.awesome-markers/leaflet.awesome-markers.css}"
+          href='../static/Leaflet.awesome-markers/leaflet.awesome-markers.css' rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/leaflet.fullscreen/1.4.5/Control.FullScreen.css" rel="stylesheet"/>
+    <link href="https://cdn.bootcss.com/leaflet-contextmenu/1.4.0/leaflet.contextmenu.min.css" rel="stylesheet"/>
 
     <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        #nav_form {
+            width: 100%;
+            height: 50px;
+            position: absolute;
+            z-index: 1;
+            background-color: rgba(137, 135, 98, 0.18);
+        }
+
         #map {
             position: absolute;
-            top: 50px;
+            z-index: 0;
+            top: 0;
             bottom: 0;
             left: 0;
             right: 0;
         }
 
-        #controls {
-            margin-left: 10px;
-            padding-top: 10px;
+        #node_info {
+            position: absolute;
+            z-index: 1;
+            width: 100px;
+            height: auto;
+            margin-left: 15px;
+            margin-top: 15px;
         }
-
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-default">
-    <div class="container-fluid">
+    <div class="container-fluid" id="nav_form">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="#" style="margin-left: 50px">
                 <img alt="Brand" th:src="1208036.png" src="../static/1208036.png" style="width: 20px;height: 20px"/>
             </a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse" id="suanfa">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-                <li><a href="#">Link</a></li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">算法选择<span class="caret"></span></a>
+                    <a href="#" id="suanfa_lable" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-haspopup="true" aria-expanded="false">算法选择<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" name="astar">A*</a></li>
                         <li role="separator" class="divider"></li>
@@ -58,18 +83,26 @@
                 </li>
             </ul>
             <form class="navbar-form navbar-left">
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="起点" id="start"/>
+                <div class="form-group" id="start_form">
+                    <input type="text" autocomplete="off" list="startList" class="form-control" placeholder="起点"
+                           id="start"/>
+                    <datalist id="startList"></datalist>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="途径" id="tujing"/>
+                    <input type="text" autocomplete="off" list="tujingList" class="form-control" placeholder="途径"
+                           id="tujing"/>
+                    <datalist id="tujingList"></datalist>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="终点" id="end"/>
+                    <input type="text" autocomplete="off" list="endList" class="form-control" placeholder="终点"
+                           id="end"/>
+                    <datalist id="endList"></datalist>
                 </div>
-                <button type="submit" class="btn btn-default" id="chaxun">查询</button>
             </form>
-            <button class="btn btn-default" id="test">查询</button>
+            <div class="navbar-btn">
+                <button class="btn btn-default" id="chaxun">查询</button>
+            </div>
+
             <div class="nav navbar-nav navbar-right">
                 <i class="far fa-clock"></i>
                 <label id="ttime" style="color: #ed4c46;">1200ms</label>
@@ -77,39 +110,106 @@
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
-
 <div id="map"></div>
 
 
 <!--<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>-->
-<script th:src="@{jquery-3.2.1.min.js}" src="../static/jquery-3.2.1.min.js"></script>
-<script th:src="@{jquery.tools.min.js}" src="../static/jquery.tool.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-tools/1.2.7/jquery.tools.min.js"></script>
 <script th:src='@{mapbox/mapbox.js}' src="../static/mapbox/mapbox.js"></script>
-<script th:src="@{Leaflet.markercluster-1.3.0/leaflet.markercluster.js}" src="../static/Leaflet.markercluster-1.3.0/leaflet.markercluster.js"></script>
-<script th:src="@{Leaflet-awesome-markers-2.0.2/leaflet.awesome-markers.min.js}" src="../static/Leaflet.awesome-markers-2.0.2/leaflet-awesome-markers.min.js"></script>
-<script th:src="@{bootstrap-3.3.7-dist/js/bootstrap.min.js}" src="../static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/leaflet.markercluster/1.3.0/leaflet.markercluster.js"></script>
+<script th:src="@{Leaflet.awesome-markers/leaflet.awesome-markers.min.js}"
+        src="../static/Leaflet.awesome-markers/leaflet.awesome-markers.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/sweetalert/2.1.0/sweetalert.min.js"></script>
+<script src="https://cdn.bootcss.com/leaflet.fullscreen/1.4.5/Control.FullScreen.js"></script>
+<script src="https://cdn.bootcss.com/leaflet-contextmenu/1.4.0/leaflet.contextmenu.min.js"></script>
+
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script src="https://www.googletagmanager.com/gtag/js?id=UA-117918827-1"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
+
     function gtag() {
         dataLayer.push(arguments);
     }
+
     gtag('js', new Date());
     gtag('config', 'UA-117918827-1');
 </script>
 
 
 <script>
-    L.mapbox.accessToken = 'pk.eyJ1IjoidGlhbnlpMjIiLCJhIjoiY2pjbHY0dmpsMGpwYTM0cXE5YW9qNm5tMyJ9.F1SO_4nuLD3dn1mYdPPnrA';
-    var map = L.mapbox.map('map', 'mapbox.streets').setView([44.98, -93.25], 18);
-    var markers = new L.MarkerClusterGroup();
-</script>
 
-<script>
-    var start,tujing,end
-    $("#start").bind('input property change', function() {
-        start = $("#start").val()
+    var style = {
+        icon: {
+            nodeMarker: L.AwesomeMarkers.icon({
+                icon: 'circle-o',
+                markerColor: 'cadetblue',
+                prefix: 'fa'
+            }),
+            favoriteMarker: L.AwesomeMarkers.icon({
+                icon: 'star',
+                markerColor: 'blue',
+                prefix: 'fa'
+            }),
+            startMarker: L.AwesomeMarkers.icon({
+                icon: 'flag-o',
+                markerColor: 'blue',
+                prefix: 'fa'
+            }),
+            endMarker: L.AwesomeMarkers.icon({
+                icon: 'flag-checkered',
+                markerColor: 'red',
+                prefix: 'fa'
+            }),
+            tujingMarker: L.AwesomeMarkers.icon({
+                icon: 'flag',
+                markerColor: 'green',
+                prefix: 'fa'
+            })
+        },
+
+        dot: {
+            aged: {color: 'blue', opacity: 0.2},
+            fresh: {color: '#ff4400', opacity: 1}
+        },
+
+        path: {
+            final: {color: 'Yellow', opacity: 0.5}
+        }
+
+    };
+
+    L.mapbox.accessToken = 'pk.eyJ1IjoidGlhbnlpMjIiLCJhIjoiY2pjbHY0dmpsMGpwYTM0cXE5YW9qNm5tMyJ9.F1SO_4nuLD3dn1mYdPPnrA';
+    var map = L.mapbox.map('map', 'mapbox.streets').setView([39.931591, 116.39277], 18);
+    // var markers = new L.MarkerClusterGroup();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    //var marker = L.marker([39.931591, 116.39277], {icon: style.icon.favoriteMarker}).addTo(map);
+    var bindpopup = "<b>坐标</b><button>选择</button><br></br><b>lat:39.931591</b><br></br><b>lon:116.39277</b>";
+    /*marker.on('click', function () {
+        marker.bindPopup("sdfs").openPopup()
+        marker = L.marker([39.931591, 116.39277], {icon: style.icon.startMarker}).addTo(map);
+        marker.on('click', function () {
+
+            marker = L.marker([39.931591, 116.39277], {icon: style.icon.endMarker}).addTo(map);
+        })
+    })*/
+
+    var layer = new L.marker([39.931591, 116.39277]);
+    var start, tujing, end;
+
+    var polyline = "";
+    var marker = null;
+
+
+
+
+    $("#start").bind('input property change', function () {
+
+        $("#startList").html("");
+        start = $("#start").val();
+
         $.ajax({
             url: "/getnode",
             type: "post",
@@ -119,55 +219,164 @@
                 "nid": start
             }),
             success: function (msg) {
-                console.log(start+":\\"+msg.nid)
+                $.each(msg, function (id, json) {
+
+                    $("#startList").append("<option value=" + json.nid + " data-nid=" + json.nid + ">" + json.nid + "</option>");
+
+                    if ($("#start").val() == json.nid ){
+
+
+                            marker = new L.marker([json.lat, json.lon], {icon: style.icon.startMarker}).addTo(map);
+
+                    }
+                    for (adj_nid in json.adj) {
+                        console.log(json.adj[adj_nid])
+                    }
+                })
             },
             error: function (msg) {
-                console.log("失败")
+                start = "";
+                console.log("失败");
             }
         })
+
     });
-    $("#tujing").bind('input property change', function() {
-        tujing = $("#tujing").val()
+    $("#tujing").bind('input property change', function () {
+
+        $("#tujingList").html("");
+        tujing = $("#tujing").val();
+
         $.ajax({
             url: "/getnode",
             type: "post",
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify({
-                "name": tujing
+                "nid": tujing
             }),
             success: function (msg) {
+                $.each(msg, function (id, json) {
 
-                console.log(tujing+":\\"+msg)
+                    $("#tujingList").append("<option value=" + json.nid + " data-nid=" + json.nid + ">" + json.nid + "</option>");
+
+                    if ($("#tujing").val() == json.nid ){
+
+
+                            marker = new L.marker([json.lat, json.lon], {icon: style.icon.tujingMarker}).addTo(map);
+
+                    }
+                    for (adj_nid in json.adj) {
+                        console.log(json.adj[adj_nid])
+                    }
+                })
             },
             error: function (msg) {
-                tujing=msg.lat
-                console.log(msg)
+                tujing = "";
+                console.log("失败");
             }
         })
+
     });
-    $("#end").bind('input property change', function() {
-        end = $("#end").val()
+    $("#end").bind('input property change', function () {
+        $("#endList").val("");
+        end = $("#end").val();
         $.ajax({
             url: "/getnode",
             type: "post",
             dataType: "json",
             contentType: "application/json",
             data: JSON.stringify({
-                "name": end
+                "nid": end
             }),
             success: function (msg) {
-                console.log(end+":\\"+msg.data.lon)
+                $.each(msg, function (id, json) {
+                    end = json.nid;
+                    $("#endList").append("<option value=" + json.nid + " data-nid=" + json.nid + ">" + json.nid + "</option>");
+
+                    /*marker = L.marker([json.lat, json.lon], {icon: style.icon.favoriteMarker}).addTo(map);
+                    marker.on({
+                        'click': function (e) {
+                            start = json.nid;
+
+                        }
+                    });*/
+                    if ($("#end").val() == json.nid ){
+
+
+                            marker = new L.marker([json.lat, json.lon], {icon: style.icon.endMarker}).addTo(map);
+
+
+
+                    }
+                    for (adj_nid in json.adj) {
+                        console.log(json.adj[adj_nid])
+                    }
+                })
+
             },
             error: function (msg) {
-                console.log("失败")
+                end = "";
+                console.log("失败");
             }
         })
     });
 
-    $("#test").click(function() {
-        alert("start:"+start+"tujing:"+tujing+"end:"+end)
+    $("#chaxun").click(function () {
+        //alert("start:" + start + "tujing:" + tujing + "end:" + end);
+        if(start == null || end == null){
+            swal({
+                    title: "起点和终点不能为空",
+                    text: "你至少应该输入起点和终点！",
+                    type: "error",
+                    showCancelButton: true/*,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定删除！",
+                    closeOnConfirm: false*/
+             });
+        }
+        else{
+            $.ajax({
+                url: "/getpath",
+                type: "post",
+                dataType: "json",
+                contentType: "application/json",
+
+                data: JSON.stringify({
+                    //添加额外的参数传给服务器
+                    "start": start,
+                    "tujing": tujing,
+                    "end": end
+                }),
+                success: function (msg) {
+               if (polyline!=""){
+                    map.removeLayer(polyline);
+                }
+                    polyline = L.polyline(msg, {color: '#0035ff'}).addTo(map);
+                    map.fitBounds(polyline.getBounds());
+
+                },
+                error: function (msg) {
+                    swal({
+                        title: "失败",
+                        text: "请输入输入起点和终点！",
+                        type: "error",
+                        showCancelButton: true/*,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "确定删除！",
+                    closeOnConfirm: false*/
+                    });
+                }
+            })
+        }
+
     });
+
+    $("#suanfa ul li ul li").click(function () {
+        $("#suanfa_lable").text($(this).text());
+        suanfa = $(this).text();
+    })
+
+
 </script>
 
 
